@@ -50,7 +50,7 @@ kubectl port-forward service/hello-k8s 8080:80
 
 ## Deployment Evidence
 
-![Nginx Running Screenshot](./screenshot/nginx-running.png)
+![Nginx Running Screenshot](./screenshot/nginx.png)
 
 ---
 
