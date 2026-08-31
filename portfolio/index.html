@@ -1,0 +1,1146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Brijesh Shetty N — ML · Security · Systems</title>
+<meta name="description" content="Brijesh Shetty N — BMSCE engineer building production-grade security and ML systems. HPE enterprise threat-detection pipeline with Kafka and Vault credential rotation, local educational RAG with hybrid retrieval, and a full-stack gamified learning platform." />
+<meta name="theme-color" content="#EFEAE0" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ----- tokens ----- */
+:root{
+  --paper:#EFEAE0;
+  --paper-2:#E8E2D4;
+  --vellum:#E5DFD2;
+  --rule:#C8C0AE;
+  --rule-2:#D8D0BE;
+  --graphite:#161922;
+  --graphite-2:#2A2F3D;
+  --ash:#5C6275;
+  --ash-2:#7A8093;
+  --cobalt:#1E3A8A;
+  --cobalt-2:#2547B0;
+  --cobalt-tint:#DDE3F2;
+  --signal:#B45309;     /* warm ochre, used VERY sparingly */
+  --ok:#15803D;
+
+  --f-display: "Fraunces", "Times New Roman", serif;
+  --f-body: "Inter", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --maxw: 1180px;
+  --pad-x: clamp(20px, 4vw, 56px);
+  --pad-y: clamp(56px, 8vw, 112px);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--graphite);
+  font-family:var(--f-body);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+/* subtle blueprint grid bg */
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(var(--rule-2) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule-2) 1px, transparent 1px);
+  background-size:48px 48px;
+  opacity:.18;
+  pointer-events:none;
+  z-index:0;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad-x);position:relative;z-index:1}
+
+/* ----- packet-frame primitives ----- */
+.meta-strip{
+  font-family:var(--f-mono);
+  font-size:11px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--ash);
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:10px 0;
+  border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+  flex-wrap:wrap;
+}
+.meta-strip .dot{
+  width:6px;height:6px;border-radius:50%;background:var(--cobalt);display:inline-block;
+}
+.meta-strip .idx{color:var(--graphite);font-weight:600}
+.meta-strip .sep{opacity:.35}
+
+.eyebrow{
+  font-family:var(--f-mono);
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--cobalt);
+}
+
+h1,h2,h3{font-family:var(--f-display);font-weight:500;letter-spacing:-.01em;margin:0;font-variation-settings:"opsz" 144}
+.h-display{font-size:clamp(46px, 9vw, 112px);line-height:.95;letter-spacing:-.035em;font-weight:400}
+.h-section{font-size:clamp(34px, 5vw, 56px);line-height:1.02;letter-spacing:-.02em;font-weight:400}
+.h-card{font-family:var(--f-display);font-size:24px;line-height:1.15;letter-spacing:-.01em;font-weight:500;font-variation-settings:"opsz" 48}
+
+/* ----- nav ----- */
+.nav{
+  position:sticky;top:0;z-index:50;
+  background:color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter:saturate(140%) blur(8px);
+  -webkit-backdrop-filter:saturate(140%) blur(8px);
+  border-bottom:1px solid var(--rule);
+}
+.nav-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 0;
+}
+.brand{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--f-mono);font-size:13px;font-weight:600;letter-spacing:.04em;
+}
+.brand-mark{
+  width:26px;height:26px;border:1.5px solid var(--graphite);border-radius:4px;
+  display:grid;place-items:center;font-family:var(--f-display);font-size:14px;font-weight:600;
+  font-variation-settings:"opsz" 14;
+}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{
+  font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ash);transition:color .2s;
+}
+.nav-links a:hover{color:var(--graphite)}
+.nav-cta{
+  font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid var(--graphite);padding:8px 14px;border-radius:999px;
+  transition:background .2s,color .2s;
+}
+.nav-cta:hover{background:var(--graphite);color:var(--paper)}
+.nav-burger{display:none;width:32px;height:32px;align-items:center;justify-content:center}
+.nav-burger span,.nav-burger span::before,.nav-burger span::after{
+  content:"";display:block;width:18px;height:1.5px;background:var(--graphite);position:relative;
+}
+.nav-burger span::before{position:absolute;top:-6px;left:0}
+.nav-burger span::after{position:absolute;top:6px;left:0}
+
+@media (max-width: 760px){
+  .nav-links{
+    position:absolute;top:100%;left:0;right:0;
+    background:var(--paper);border-bottom:1px solid var(--rule);
+    flex-direction:column;align-items:flex-start;gap:0;padding:8px var(--pad-x) 16px;
+    transform:translateY(-8px);opacity:0;pointer-events:none;transition:.2s;
+  }
+  .nav-links.open{transform:none;opacity:1;pointer-events:auto}
+  .nav-links a{padding:10px 0;width:100%;border-bottom:1px solid var(--rule-2)}
+  .nav-links .nav-cta{align-self:flex-start;margin-top:8px}
+  .nav-burger{display:flex}
+}
+
+/* ----- hero ----- */
+.hero{padding:clamp(48px,7vw,96px) 0 clamp(56px,8vw,112px)}
+.hero-status{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ash);margin-bottom:28px;
+}
+.pulse{
+  width:8px;height:8px;border-radius:50%;background:var(--ok);
+  box-shadow:0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent)}
+  70%{box-shadow:0 0 0 10px transparent}
+  100%{box-shadow:0 0 0 0 transparent}
+}
+.hero-greet{
+  font-family:var(--f-mono);font-size:13px;color:var(--ash);letter-spacing:.04em;margin-bottom:6px;
+}
+.hero h1{margin-bottom:8px}
+.hero h1 em{font-style:italic;color:var(--cobalt);font-weight:400}
+
+.role-row{
+  display:flex;align-items:baseline;gap:14px;margin:18px 0 28px;flex-wrap:wrap;
+}
+.role-tag{
+  font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ash);
+}
+.role-text{
+  font-family:var(--f-display);font-style:italic;font-weight:400;font-size:clamp(22px,3vw,32px);
+  color:var(--graphite);min-height:1.3em;
+  font-variation-settings:"opsz" 32;
+}
+.role-text .caret{display:inline-block;width:2px;height:.9em;background:var(--cobalt);margin-left:4px;vertical-align:-2px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+
+.hero-lede{
+  font-size:18px;line-height:1.5;color:var(--graphite-2);max-width:62ch;margin:0 0 36px;
+}
+.hero-ctas{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:48px}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 22px;border-radius:999px;
+  font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;
+  transition:transform .15s, background .2s, color .2s, border-color .2s;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--graphite);color:var(--paper);border:1px solid var(--graphite)}
+.btn-primary:hover{background:var(--cobalt);border-color:var(--cobalt)}
+.btn-ghost{border:1px solid var(--graphite);color:var(--graphite)}
+.btn-ghost:hover{background:var(--graphite);color:var(--paper)}
+.btn-quiet{color:var(--ash);padding:14px 6px}
+.btn-quiet:hover{color:var(--graphite)}
+.btn .arr{display:inline-block;transition:transform .2s}
+.btn:hover .arr{transform:translateX(3px)}
+
+/* signal — the signature element */
+.signal-wrap{
+  position:relative;height:96px;
+  border-top:1px dashed var(--rule);border-bottom:1px dashed var(--rule);
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:var(--f-mono);font-size:11px;color:var(--ash);letter-spacing:.08em;text-transform:uppercase;
+  padding:0 8px;overflow:hidden;
+}
+.signal-wrap svg{position:absolute;inset:0;width:100%;height:100%}
+.signal-wrap .signal-label{position:relative;z-index:2;background:var(--paper);padding:2px 8px}
+
+/* ----- section base ----- */
+section.s{padding:var(--pad-y) 0;border-top:1px solid var(--rule)}
+.s-head{margin:24px 0 44px;display:flex;flex-direction:column;gap:14px;max-width:780px}
+.s-head .h-section em{font-style:italic;color:var(--cobalt);font-weight:400}
+.s-head .intro{color:var(--ash);font-size:16px;line-height:1.55;max-width:62ch}
+
+/* ----- about ----- */
+.about-grid{display:grid;grid-template-columns: 1.5fr 1fr;gap:48px;align-items:start}
+.bio p{margin:0 0 18px;color:var(--graphite-2);max-width:60ch}
+.bio p:first-child{font-size:18px;color:var(--graphite);line-height:1.5}
+.aside-card{
+  background:var(--vellum);border:1px solid var(--rule);border-radius:4px;
+  padding:24px;display:flex;flex-direction:column;gap:20px;
+}
+.stat{display:flex;flex-direction:column;gap:4px;padding-bottom:18px;border-bottom:1px solid var(--rule)}
+.stat:last-child{border-bottom:none;padding-bottom:0}
+.stat .v{font-family:var(--f-display);font-size:40px;line-height:1;font-weight:400;letter-spacing:-.02em;font-variation-settings:"opsz" 48}
+.stat .v em{font-style:italic;color:var(--cobalt)}
+.stat .k{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash)}
+@media (max-width:820px){.about-grid{grid-template-columns:1fr;gap:32px}}
+
+/* ----- skills ----- */
+.skills{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border-top:1px solid var(--rule);border-left:1px solid var(--rule)}
+.skill-group{padding:28px 32px;border-bottom:1px solid var(--rule);border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:18px}
+.skill-group h3{font-family:var(--f-display);font-size:22px;font-weight:500;font-variation-settings:"opsz" 32;letter-spacing:-.01em}
+.skill-group .sg-meta{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ash)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-family:var(--f-mono);font-size:12px;letter-spacing:.02em;
+  padding:6px 12px;border:1px solid var(--rule);border-radius:999px;background:var(--paper);
+  color:var(--graphite-2);
+}
+@media (max-width: 740px){.skills{grid-template-columns:1fr}}
+
+/* ----- projects ----- */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px}
+.filter{
+  font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  padding:8px 14px;border:1px solid var(--rule);border-radius:999px;color:var(--ash);
+  transition:.2s;
+}
+.filter:hover{color:var(--graphite);border-color:var(--graphite)}
+.filter.active{background:var(--graphite);color:var(--paper);border-color:var(--graphite)}
+
+.proj-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.proj{
+  background:var(--vellum);border:1px solid var(--rule);border-radius:6px;
+  padding:24px;display:flex;flex-direction:column;gap:14px;
+  transition:transform .2s, box-shadow .2s, background .2s;
+  position:relative;overflow:hidden;
+}
+.proj:hover{transform:translateY(-3px);box-shadow:0 12px 24px -16px rgba(22,25,34,.25);background:#EDE7D9}
+.proj.featured::before{
+  content:"";position:absolute;top:0;left:0;width:3px;height:100%;background:var(--cobalt);
+}
+.proj-head{
+  display:flex;align-items:center;gap:12px;
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ash);
+  flex-wrap:wrap;
+}
+.proj-head .featured{color:var(--cobalt);font-weight:600}
+.proj-head .cat{color:var(--graphite)}
+.proj h3{font-family:var(--f-display);font-size:26px;line-height:1.1;font-weight:500;letter-spacing:-.015em;font-variation-settings:"opsz" 48}
+.proj .repo{font-family:var(--f-mono);font-size:12px;color:var(--ash);margin-top:-6px}
+.proj p{margin:0;color:var(--graphite-2);font-size:15px;line-height:1.5}
+.proj-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:6px}
+.proj-tag{font-family:var(--f-mono);font-size:11px;color:var(--ash);padding:3px 8px;border:1px solid var(--rule);border-radius:3px;background:var(--paper)}
+.proj-link{
+  display:inline-flex;align-items:center;gap:8px;margin-top:8px;
+  font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--graphite);
+  font-weight:500;
+}
+.proj-link:hover{color:var(--cobalt)}
+.proj-link .arr{transition:transform .2s}
+.proj-link:hover .arr{transform:translateX(3px)}
+
+@media (max-width: 780px){.proj-grid{grid-template-columns:1fr}}
+
+/* ----- experience timeline ----- */
+.timeline{display:flex;flex-direction:column;gap:0;position:relative}
+.tl-item{
+  display:grid;grid-template-columns:160px 24px 1fr;gap:24px;align-items:start;
+  padding:28px 0;border-bottom:1px solid var(--rule);
+}
+.tl-item:last-child{border-bottom:none}
+.tl-when{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--cobalt);padding-top:6px}
+.tl-mark{position:relative;display:flex;justify-content:center;padding-top:10px}
+.tl-mark::before{
+  content:"";width:10px;height:10px;border:2px solid var(--graphite);border-radius:50%;background:var(--paper);
+}
+.tl-mark::after{
+  content:"";position:absolute;top:24px;width:1px;height:calc(100% + 28px);background:var(--rule);
+}
+.tl-item:last-child .tl-mark::after{display:none}
+.tl-body h3{font-family:var(--f-display);font-size:24px;font-weight:500;line-height:1.15;letter-spacing:-.01em;font-variation-settings:"opsz" 48;margin-bottom:4px}
+.tl-org{font-family:var(--f-mono);font-size:12px;color:var(--ash);letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px}
+.tl-body ul{margin:0 0 14px;padding-left:18px;color:var(--graphite-2)}
+.tl-body ul li{margin-bottom:6px}
+.tl-tags{display:flex;flex-wrap:wrap;gap:6px}
+
+@media (max-width:720px){
+  .tl-item{grid-template-columns:18px 1fr;gap:18px}
+  .tl-when{grid-column:1/-1;padding-top:0;margin-bottom:-8px}
+  .tl-mark{padding-top:8px}
+}
+
+/* ----- contact ----- */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+.contact-side .row{
+  display:flex;flex-direction:column;gap:4px;padding:18px 0;border-bottom:1px solid var(--rule);
+}
+.contact-side .row:first-of-type{border-top:1px solid var(--rule)}
+.contact-side .row .label{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash)}
+.contact-side .row .val{font-family:var(--f-display);font-size:22px;font-weight:500;letter-spacing:-.005em;font-variation-settings:"opsz" 32}
+.contact-side .row .val a:hover{color:var(--cobalt)}
+
+.contact-form{
+  background:var(--vellum);border:1px solid var(--rule);border-radius:6px;padding:28px;
+}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.field label{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash)}
+.field input,.field textarea{
+  font:inherit;font-size:15px;color:var(--graphite);
+  background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:12px 14px;
+  outline:none;transition:border-color .2s, box-shadow .2s;
+}
+.field input:focus,.field textarea:focus{border-color:var(--cobalt);box-shadow:0 0 0 3px var(--cobalt-tint)}
+.field textarea{resize:vertical;min-height:120px}
+.form-note{font-family:var(--f-mono);font-size:11px;color:var(--ash);margin-top:10px}
+
+@media (max-width: 820px){.contact-grid{grid-template-columns:1fr;gap:32px}}
+
+/* ----- footer ----- */
+footer{
+  border-top:1px solid var(--rule);padding:36px 0;
+  display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  font-family:var(--f-mono);font-size:12px;color:var(--ash);
+}
+footer .links{display:flex;gap:18px}
+footer a:hover{color:var(--graphite)}
+
+/* ----- utilities ----- */
+.fadeup{opacity:0;transform:translateY(14px);transition:opacity .6s, transform .6s}
+.fadeup.in{opacity:1;transform:none}
+
+::selection{background:var(--cobalt);color:var(--paper)}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a href="#top" class="brand" aria-label="Brijesh — home">
+      <span class="brand-mark">B</span>
+      <span>brijesh shetty n</span>
+    </a>
+    <button class="nav-burger" id="burger" aria-label="Menu"><span></span></button>
+    <nav class="nav-links" id="navlinks">
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#projects">Projects</a>
+      <a href="#journey">Journey</a>
+      <a href="#contact">Contact</a>
+      <a href="#contact" class="nav-cta">Let's talk →</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<main id="top">
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-status">
+      <span class="pulse" aria-hidden="true"></span>
+      <span>Available for internships</span>
+      <span class="sep" style="opacity:.4">·</span>
+      <span>Bengaluru, IN</span>
+    </div>
+
+    <p class="hero-greet">// Hi, I'm</p>
+    <h1 class="h-display">Brijesh Shetty <em>N.</em></h1>
+
+    <div class="role-row" aria-live="polite">
+      <span class="role-tag">role ::</span>
+      <span class="role-text" id="role">Machine Learning Engineer<span class="caret"></span></span>
+    </div>
+
+    <p class="hero-lede">
+      BMSCE engineering student working on production-shaped ML and security systems —
+      from an HPE-internship threat-detection pipeline that fuses Kafka-streamed ML inference
+      with human-approved HashiCorp Vault credential rotation, to a local educational RAG stack
+      with hybrid BM25 + dense retrieval and cross-encoder re-ranking.
+    </p>
+
+    <div class="hero-ctas">
+      <a href="#projects" class="btn btn-primary">View my work <span class="arr">→</span></a>
+      <a href="#contact" class="btn btn-ghost">Get in touch</a>
+      <a href="https://github.com/brijesh-shetty" target="_blank" rel="noopener" class="btn btn-quiet">GitHub ↗</a>
+      <a href="#" class="btn btn-quiet" id="resume-link">Resume ↗</a>
+    </div>
+
+    <!-- signature element: live signal -->
+    <div class="signal-wrap" aria-hidden="true">
+      <span class="signal-label">signal · in</span>
+      <svg viewBox="0 0 1000 100" preserveAspectRatio="none">
+        <path id="signal-path"
+              d="M0,50 L120,50 L130,30 L140,70 L150,40 L160,60 L170,50 L260,50 L270,20 L285,80 L300,50 L420,50 L430,42 L445,58 L460,50 L580,50 L590,28 L605,72 L620,50 L740,50 L750,46 L765,54 L780,50 L900,50 L910,30 L925,70 L940,50 L1000,50"
+              fill="none" stroke="#1E3A8A" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="2400" stroke-dashoffset="2400">
+          <animate attributeName="stroke-dashoffset" from="2400" to="0" dur="3.2s" fill="freeze" />
+        </path>
+      </svg>
+      <span class="signal-label">amplitude · 1.0</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section class="s" id="about">
+  <div class="wrap">
+    <div class="meta-strip">
+      <span class="dot"></span>
+      <span class="idx">[01]</span>
+      <span class="sep">/</span>
+      <span>section · about</span>
+      <span class="sep">/</span>
+      <span>type · introduction</span>
+    </div>
+
+    <div class="s-head">
+      <span class="eyebrow">// who i am</span>
+      <h2 class="h-section">Systems-minded engineer working across <em>ML and the wire.</em></h2>
+      <p class="intro">
+        I like problems that show up at the boundary — where a model meets a packet, where a packet meets a person.
+      </p>
+    </div>
+
+    <div class="about-grid">
+      <div class="bio">
+        <p>
+          I'm an undergraduate engineering student at BMS College of Engineering, Bengaluru,
+          currently interning at Hewlett Packard Enterprise, where I've been building an AI-powered
+          enterprise threat-detection pipeline that watches network traffic, runs ML inference at
+          streaming speed, and closes the loop by rotating compromised credentials through Vault —
+          with a human in the loop for the highest-severity actions.
+        </p>
+        <p>
+          Alongside the internship, I've been building Edu_RAG, a local educational RAG system
+          that ingests PDFs, DOCX, and slide decks — including diagrams via OCR — and answers
+          questions over them using hybrid BM25 + dense retrieval, cross-encoder re-ranking,
+          and locally-served LLMs through Ollama. And a capstone gamified learning platform
+          with sandboxed code execution, adaptive AI interviews, and proctored mock tests.
+        </p>
+        <p>
+          Outside those, my work spans applied ML (an XGBoost taxi-fare model at R² 0.91,
+          a CV-based focus detector), network telemetry (a TCP packet-loss analysis pipeline),
+          and backend systems (a Redis-backed distributed rate limiter). I care about systems
+          that are honest about uncertainty, fast where it matters, and straightforward enough
+          for the next person to change without dread.
+        </p>
+      </div>
+
+      <aside class="aside-card" aria-label="Quick facts">
+        <div class="stat">
+          <span class="v"><em>HPE</em></span>
+          <span class="k">Current internship · Threat-detection pipeline</span>
+        </div>
+        <div class="stat">
+          <span class="v">0.91</span>
+          <span class="k">R² · XGBoost taxi-fare model</span>
+        </div>
+        <div class="stat">
+          <span class="v">9</span>
+          <span class="k">Public repositories · ML · Security · Full-stack</span>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SKILLS ============ -->
+<section class="s" id="skills">
+  <div class="wrap">
+    <div class="meta-strip">
+      <span class="dot"></span>
+      <span class="idx">[02]</span>
+      <span class="sep">/</span>
+      <span>section · skills</span>
+      <span class="sep">/</span>
+      <span>type · stack</span>
+    </div>
+
+    <div class="s-head">
+      <span class="eyebrow">// my toolkit</span>
+      <h2 class="h-section">The stack I <em>actually</em> reach for.</h2>
+      <p class="intro">
+        Languages and tools I've used in projects that shipped or made it past the prototype stage —
+        organized by the part of the problem they solve.
+      </p>
+    </div>
+
+    <div class="skills">
+      <div class="skill-group">
+        <span class="sg-meta">// 01 · languages</span>
+        <h3>Languages</h3>
+        <div class="chips">
+          <span class="chip">Python</span>
+          <span class="chip">TypeScript</span>
+          <span class="chip">JavaScript</span>
+          <span class="chip">SQL</span>
+          <span class="chip">C</span>
+          <span class="chip">C++</span>
+          <span class="chip">HTML / CSS</span>
+        </div>
+      </div>
+
+      <div class="skill-group">
+        <span class="sg-meta">// 02 · ml &amp; ai</span>
+        <h3>ML &amp; AI</h3>
+        <div class="chips">
+          <span class="chip">XGBoost</span>
+          <span class="chip">Scikit-learn</span>
+          <span class="chip">Pandas · NumPy</span>
+          <span class="chip">OpenCV</span>
+          <span class="chip">LangChain</span>
+          <span class="chip">RAG · Hybrid Retrieval</span>
+          <span class="chip">ChromaDB</span>
+          <span class="chip">Sentence Transformers</span>
+          <span class="chip">FlashRank Re-ranking</span>
+          <span class="chip">Ollama (local LLMs)</span>
+          <span class="chip">Claude API</span>
+          <span class="chip">Feature Engineering</span>
+        </div>
+      </div>
+
+      <div class="skill-group">
+        <span class="sg-meta">// 03 · backend &amp; systems</span>
+        <h3>Backend &amp; Systems</h3>
+        <div class="chips">
+          <span class="chip">FastAPI</span>
+          <span class="chip">Node.js · Express</span>
+          <span class="chip">Apache Kafka</span>
+          <span class="chip">Redis</span>
+          <span class="chip">PostgreSQL</span>
+          <span class="chip">MongoDB</span>
+          <span class="chip">Docker · Compose</span>
+          <span class="chip">HashiCorp Vault</span>
+          <span class="chip">REST APIs</span>
+          <span class="chip">CI/CD (GitHub Actions)</span>
+        </div>
+      </div>
+
+      <div class="skill-group">
+        <span class="sg-meta">// 04 · security &amp; networking</span>
+        <h3>Security &amp; Networking</h3>
+        <div class="chips">
+          <span class="chip">Zeek · Suricata (IDS)</span>
+          <span class="chip">Deep Packet Inspection</span>
+          <span class="chip">Elastic Common Schema</span>
+          <span class="chip">Anomaly Detection</span>
+          <span class="chip">Credential Rotation</span>
+          <span class="chip">TCP/IP · Packet Analysis</span>
+          <span class="chip">Wireshark</span>
+          <span class="chip">Network Telemetry</span>
+          <span class="chip">Human-in-the-loop SOC</span>
+        </div>
+      </div>
+
+      <div class="skill-group">
+        <span class="sg-meta">// 05 · frontend &amp; web</span>
+        <h3>Frontend &amp; Web</h3>
+        <div class="chips">
+          <span class="chip">React 18</span>
+          <span class="chip">Vite</span>
+          <span class="chip">Streamlit</span>
+          <span class="chip">Monaco Editor</span>
+          <span class="chip">EJS Templating</span>
+          <span class="chip">3D WebGL (Three.js-style)</span>
+          <span class="chip">Responsive UI</span>
+        </div>
+      </div>
+
+      <div class="skill-group">
+        <span class="sg-meta">// 06 · foundations</span>
+        <h3>CS Foundations</h3>
+        <div class="chips">
+          <span class="chip">Data Structures</span>
+          <span class="chip">Algorithms</span>
+          <span class="chip">Operating Systems</span>
+          <span class="chip">Computer Networks</span>
+          <span class="chip">DBMS</span>
+          <span class="chip">OOP</span>
+          <span class="chip">Distributed Systems</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROJECTS ============ -->
+<section class="s" id="projects">
+  <div class="wrap">
+    <div class="meta-strip">
+      <span class="dot"></span>
+      <span class="idx">[03]</span>
+      <span class="sep">/</span>
+      <span>section · projects</span>
+      <span class="sep">/</span>
+      <span>count · 09</span>
+    </div>
+
+    <div class="s-head">
+      <span class="eyebrow">// things i've built</span>
+      <h2 class="h-section">Nine projects. One <em>internship.</em></h2>
+      <p class="intro">
+        Everything on my GitHub — from the HPE production threat-detection pipeline down to a
+        Redis rate-limiter learning project. Filter by whichever side of the stack you care about.
+      </p>
+    </div>
+
+    <div class="filters" role="tablist" aria-label="Project filters">
+      <button class="filter active" data-filter="all">All</button>
+      <button class="filter" data-filter="security">Security</button>
+      <button class="filter" data-filter="ml">ML &amp; AI</button>
+      <button class="filter" data-filter="systems">Backend &amp; Systems</button>
+      <button class="filter" data-filter="web">Web &amp; Full-stack</button>
+    </div>
+
+    <div class="proj-grid" id="projgrid">
+
+      <article class="proj featured" data-tags="security ml systems">
+        <div class="proj-head">
+          <span class="featured">★★ Main project</span>
+          <span class="sep">/</span>
+          <span class="cat">Security · ML · Systems</span>
+        </div>
+        <h3>HPE — Enterprise Network Threat Detection Pipeline</h3>
+        <span class="repo">brijesh-shetty / hp · Hewlett Packard Enterprise Internship</span>
+        <p>
+          A production-shaped SOC backend built during my HPE internship. A 10-stage pipeline
+          ingests raw packets from Zeek/Suricata IDS, ships them via Elastic Beats into Kafka,
+          runs ML inference on streamed features, and — for BLOCK / CRITICAL threats — creates a
+          pending alert that an admin must approve before HashiCorp Vault rotates credentials.
+          Visualised through a 3D WebGL traffic view, a Bento-box dashboard, and a Security Admin Console.
+        </p>
+        <div class="proj-tags">
+          <span class="proj-tag">Python</span>
+          <span class="proj-tag">FastAPI</span>
+          <span class="proj-tag">Kafka</span>
+          <span class="proj-tag">Zeek / Suricata</span>
+          <span class="proj-tag">HashiCorp Vault</span>
+          <span class="proj-tag">ML Inference</span>
+          <span class="proj-tag">Human-in-the-loop</span>
+          <span class="proj-tag">WebGL</span>
+        </div>
+        <a class="proj-link" href="https://github.com/brijesh-shetty/hp" target="_blank" rel="noopener">View project <span class="arr">→</span></a>
+      </article>
+
+      <article class="proj featured" data-tags="ml web">
+        <div class="proj-head">
+          <span class="featured">★ Featured</span>
+          <span class="sep">/</span>
+          <span class="cat">ML · RAG</span>
+        </div>
+        <h3>Edu_RAG — Local Educational RAG</h3>
+        <span class="repo">brijesh-shetty / Edu_RAG</span>
+        <p>
+          A Streamlit app that ingests PDFs, DOCX, and slide decks — including diagram text via
+          Tesseract OCR — then answers questions over them using hybrid BM25 + dense retrieval,
+          cross-encoder re-ranking with FlashRank, and locally-served LLMs through Ollama. Includes
+          a quiz-generation chain that turns any uploaded material into a practice set. All local,
+          no data leaves the machine.
+        </p>
+        <div class="proj-tags">
+          <span class="proj-tag">Python</span>
+          <span class="proj-tag">Streamlit</span>
+          <span class="proj-tag">LangChain</span>
+          <span class="proj-tag">ChromaDB</span>
+          <span class="proj-tag">Ollama</span>
+          <span class="proj-tag">BM25 + Dense</span>
+          <span class="proj-tag">Cross-encoder Re-rank</span>
+          <span class="proj-tag">Tesseract OCR</span>
+        </div>
+        <a class="proj-link" href="https://github.com/brijesh-shetty/Edu_RAG" target="_blank" rel="noopener">View project <span class="arr">→</span></a>
+      </article>
+
+      <article class="proj featured" data-tags="web ml systems">
+        <div class="proj-head">
+          <span class="featured">★ Featured</span>
+          <span class="sep">/</span>
+          <span class="cat">Full-stack · Capstone</span>
+        </div>
+        <h3>LearnHub — Gamified Learning &amp; Assessment</h3>
+        <span class="repo">brijesh-shetty / capstone</span>
+        <p>
+          Eight-phase capstone platform: an 868-question mock-test engine with sections, autosave,
+          and server-side timing; Monaco-editor coding problems executed in a sandboxed Piston
+          container; AI mock interviews with rubric-scored reports (Groq, Anthropic fallback); and
+          an admin console with a review queue, test builder, and proctoring timeline. Native
+          PostgreSQL 18 behind a Node backend and a Vite / React 18 client.
+        </p>
+        <div class="proj-tags">
+          <span class="proj-tag">TypeScript</span>
+          <span class="proj-tag">React 18 · Vite</span>
+          <span class="proj-tag">Node.js</span>
+          <span class="proj-tag">PostgreSQL 18</span>
+          <span class="proj-tag">Docker · Piston</span>
+          <span class="proj-tag">Monaco Editor</span>
+          <span class="proj-tag">Groq · Anthropic</span>
+        </div>
+        <a class="proj-link" href="https://github.com/brijesh-shetty/capstone" target="_blank" rel="noopener">View project <span class="arr">→</span></a>
+      </article>
+
+      <article class="proj" data-tags="ml">
+        <div class="proj-head">
+          <span class="cat">Machine Learning</span>
+        </div>
+        <h3>Taxi Trip Duration Predictor</h3>
+        <span class="repo">brijesh-shetty / taxi-fare-prediction</span>
+        <p>
+          End-to-end ensemble pipeline predicting taxi trip durations from raw trip data —
+          feature engineering on time, distance, and traffic signals; XGBoost wins out with
+          R² 0.91 over linear and tree baselines.
+        </p>
+        <div class="proj-tags">
+          <span class="proj-tag">Python</span>
+          <span class="proj-tag">XGBoost</span>
+          <span class="proj-tag">Pandas</span>
+          <span class="proj-tag">Scikit-learn</span>
+        </div>
+        <a class="proj-link" href="https://github.com/brijesh-shetty/taxi-fare-prediction" target="_blank" rel="noopener">View project <span class="arr">→</span></a>
+      </article>
+
+      <article class="proj" data-tags="systems security">
+        <div class="proj-head">
+          <span class="cat">Networking</span>
+        </div>
+        <h3>TCP Packet Loss Pipeline</h3>
+        <span class="repo">brijesh-shetty / TCP_Packet_Loss_Pipeline</span>
+        <p>
+          A telemetry pipeline that ingests TCP traffic captures, extracts loss patterns, and
+          surfaces where things go wrong — the kind of visibility that turns "the network feels
+          slow" into a chart.
+        </p>
+        <div class="proj-tags">
+          <span class="proj-tag">Python</span>
+          <span class="proj-tag">TCP/IP</span>
+          <span class="proj-tag">Telemetry</span>
+        </div>
+        <a class="proj-link" href="https://github.com/brijesh-shetty/TCP_Packet_Loss_Pipeline" target="_blank" rel="noopener">View project <span class="arr">→</span></a>
+      </article>
+
+      <article class="proj" data-tags="ml">
+        <div class="proj-head">
+          <span class="cat">Computer Vision</span>
+        </div>
+        <h3>Focus Detection</h3>
+        <span class="repo">brijesh-shetty / focus-detection</span>
+        <p>
+          A CV prototype that estimates whether someone is paying attention to the screen from a
+          webcam feed — useful for online learning, proctoring, and basic ergonomics nudges. Early
+          shape of the ideas that later fed into the LearnHub proctoring console.
+        </p>
+        <div class="proj-tags">
+          <span class="proj-tag">Python</span>
+          <span class="proj-tag">OpenCV</span>
+          <span class="proj-tag">Computer Vision</span>
+        </div>
+        <a class="proj-link" href="https://github.com/brijesh-shetty/focus-detection" target="_blank" rel="noopener">View project <span class="arr">→</span></a>
+      </article>
+
+      <article class="proj" data-tags="systems">
+        <div class="proj-head">
+          <span class="cat">Backend · Distributed</span>
+        </div>
+        <h3>Distributed Rate Limiter</h3>
+        <span class="repo">brijesh-shetty / rate_limiter</span>
+        <p>
+          A distributed rate limiter built on Redis with a FastAPI front end — a deliberate
+          learning project in atomicity and distributed-counter design. Structured in phases,
+          starting from "why is app-side read-modify-write racy but <code>INCR</code> is not" and
+          building up from there.
+        </p>
+        <div class="proj-tags">
+          <span class="proj-tag">Python</span>
+          <span class="proj-tag">FastAPI</span>
+          <span class="proj-tag">Redis</span>
+          <span class="proj-tag">Docker Compose</span>
+        </div>
+        <a class="proj-link" href="https://github.com/brijesh-shetty/rate_limiter" target="_blank" rel="noopener">View project <span class="arr">→</span></a>
+      </article>
+
+      <article class="proj" data-tags="ml web systems">
+        <div class="proj-head">
+          <span class="cat">AI · Geopolitics · WIP</span>
+        </div>
+        <h3>Resilience Grid — Energy Supply-Chain AI</h3>
+        <span class="repo">brijesh-shetty / ET---AI</span>
+        <p>
+          Situational-awareness platform for India's energy supply chain — crude, LNG, coking
+          coal, critical minerals, solar PV. Fuses AIS vessel data, GDELT events, OFAC sanctions,
+          and commodity prices into a unified risk score, with an LP optimiser for sourcing
+          scenarios and Claude-powered briefing synthesis. FastAPI backend, React 18 + Vite
+          dashboard.
+        </p>
+        <div class="proj-tags">
+          <span class="proj-tag">FastAPI</span>
+          <span class="proj-tag">React 18</span>
+          <span class="proj-tag">Claude API</span>
+          <span class="proj-tag">LP Optimisation</span>
+          <span class="proj-tag">Risk Modelling</span>
+        </div>
+        <a class="proj-link" href="https://github.com/brijesh-shetty/ET---AI" target="_blank" rel="noopener">View project <span class="arr">→</span></a>
+      </article>
+
+      <article class="proj" data-tags="web">
+        <div class="proj-head">
+          <span class="cat">Web</span>
+        </div>
+        <h3>SolveMate</h3>
+        <span class="repo">brijesh-shetty / SolveMate</span>
+        <p>
+          An earlier web app for working through problems collaboratively — built with EJS templating
+          and a Node.js backend. Kept in the list because it's part of the honest arc.
+        </p>
+        <div class="proj-tags">
+          <span class="proj-tag">Node.js</span>
+          <span class="proj-tag">Express</span>
+          <span class="proj-tag">EJS</span>
+        </div>
+        <a class="proj-link" href="https://github.com/brijesh-shetty/SolveMate" target="_blank" rel="noopener">View project <span class="arr">→</span></a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ JOURNEY / EXPERIENCE ============ -->
+<section class="s" id="journey">
+  <div class="wrap">
+    <div class="meta-strip">
+      <span class="dot"></span>
+      <span class="idx">[04]</span>
+      <span class="sep">/</span>
+      <span>section · journey</span>
+      <span class="sep">/</span>
+      <span>type · timeline</span>
+    </div>
+
+    <div class="s-head">
+      <span class="eyebrow">// experience &amp; milestones</span>
+      <h2 class="h-section">Where I've worked, <em>learned, and shipped.</em></h2>
+      <p class="intro">
+        A short timeline — academic foundations, project work, and what I'm focused on right now.
+      </p>
+    </div>
+
+    <div class="timeline">
+
+      <div class="tl-item">
+        <div class="tl-when">Present</div>
+        <div class="tl-mark" aria-hidden="true"></div>
+        <div class="tl-body">
+          <h3>Project Intern — Enterprise Threat Detection Pipeline</h3>
+          <div class="tl-org">Hewlett Packard Enterprise · HPE Interns</div>
+          <ul>
+            <li>Building a production-grade AI-powered cybersecurity pipeline: a 10-stage flow from Zeek/Suricata IDS through Elastic Beats and Kafka into a streaming ML inference engine.</li>
+            <li>Designed the human-in-the-loop credential rotation flow so BLOCK / CRITICAL alerts pause for admin approval before HashiCorp Vault rotates keys — human oversight over high-impact actions.</li>
+            <li>Contributed to the 3D WebGL traffic visualisation, the Bento-box SOC dashboard, and the Security Admin Console with CI/CD via GitHub Actions.</li>
+          </ul>
+          <div class="tl-tags">
+            <span class="proj-tag">Python · FastAPI</span>
+            <span class="proj-tag">Kafka · Zeek · Suricata</span>
+            <span class="proj-tag">HashiCorp Vault</span>
+            <span class="proj-tag">ML Inference</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-when">2026</div>
+        <div class="tl-mark" aria-hidden="true"></div>
+        <div class="tl-body">
+          <h3>Edu_RAG — Local Educational RAG System</h3>
+          <div class="tl-org">Personal Project · Ongoing</div>
+          <ul>
+            <li>Built a Streamlit app that turns lecture PDFs, DOCX, and slide decks into a queryable knowledge base — with Tesseract OCR pulling text out of diagrams.</li>
+            <li>Implemented hybrid retrieval (BM25 + dense embeddings) with cross-encoder re-ranking via FlashRank, plus a quiz-generation chain over the retrieved chunks.</li>
+            <li>Runs entirely local using Ollama-served LLMs — no data leaves the machine.</li>
+          </ul>
+          <div class="tl-tags">
+            <span class="proj-tag">LangChain</span>
+            <span class="proj-tag">ChromaDB</span>
+            <span class="proj-tag">Ollama</span>
+            <span class="proj-tag">Hybrid Retrieval</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-when">2025 — 2026</div>
+        <div class="tl-mark" aria-hidden="true"></div>
+        <div class="tl-body">
+          <h3>Capstone — LearnHub Assessment Platform</h3>
+          <div class="tl-org">BMSCE Capstone · 8 Phases Complete</div>
+          <ul>
+            <li>Full-stack gamified learning platform with an 868-question mock-test engine, Monaco-editor coding questions run inside a Piston sandbox, and AI mock interviews with rubric-scored reports.</li>
+            <li>Built the admin side: test builder with selection rules, review queue for AI-proposed answer keys, and attempt reports with proctoring timeline + cohort analytics.</li>
+            <li>Native PostgreSQL 18, TypeScript throughout, Docker for the sandbox layer.</li>
+          </ul>
+          <div class="tl-tags">
+            <span class="proj-tag">TypeScript</span>
+            <span class="proj-tag">React 18</span>
+            <span class="proj-tag">PostgreSQL</span>
+            <span class="proj-tag">Docker</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-when">2025</div>
+        <div class="tl-mark" aria-hidden="true"></div>
+        <div class="tl-body">
+          <h3>Applied ML &amp; Systems Projects</h3>
+          <div class="tl-org">Coursework + Personal Projects</div>
+          <ul>
+            <li>Taxi trip-duration predictor — ensemble ML with XGBoost reaching R² 0.91 over linear and tree baselines. Careful features beat throwing a bigger model at the problem.</li>
+            <li>TCP packet-loss telemetry pipeline for turning "network feels slow" into a chart.</li>
+            <li>Focus-detection CV prototype and a Redis-backed distributed rate limiter — both driven by wanting to understand the primitive, not just call the library.</li>
+          </ul>
+          <div class="tl-tags">
+            <span class="proj-tag">XGBoost</span>
+            <span class="proj-tag">OpenCV</span>
+            <span class="proj-tag">Redis</span>
+            <span class="proj-tag">TCP/IP</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-when">Ongoing</div>
+        <div class="tl-mark" aria-hidden="true"></div>
+        <div class="tl-body">
+          <h3>B.E. — Information Science &amp; Engineering</h3>
+          <div class="tl-org">BMS College of Engineering · Bengaluru</div>
+          <ul>
+            <li>Undergraduate coursework in data structures, operating systems, computer networks, and DBMS.</li>
+            <li>Using coursework as a springboard for the HPE internship, Edu_RAG, and the capstone — not the other way around.</li>
+          </ul>
+          <div class="tl-tags">
+            <span class="proj-tag">CS Fundamentals</span>
+            <span class="proj-tag">Academics</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section class="s" id="contact">
+  <div class="wrap">
+    <div class="meta-strip">
+      <span class="dot"></span>
+      <span class="idx">[05]</span>
+      <span class="sep">/</span>
+      <span>section · contact</span>
+      <span class="sep">/</span>
+      <span>type · tail</span>
+    </div>
+
+    <div class="s-head">
+      <span class="eyebrow">// let's talk</span>
+      <h2 class="h-section">Have a role, a project, or just a <em>good problem?</em></h2>
+      <p class="intro">
+        Internships, collaborations, or anything ML / networking / systems — my inbox is open.
+      </p>
+    </div>
+
+    <div class="contact-grid">
+      <div class="contact-side">
+        <div class="row">
+          <span class="label">Email</span>
+          <span class="val"><a href="mailto:brijeshshetty005@gmail.com">brijeshshetty005@gmail.com</a></span>
+        </div>
+        <div class="row">
+          <span class="label">GitHub</span>
+          <span class="val"><a href="https://github.com/brijesh-shetty" target="_blank" rel="noopener">@brijesh-shetty</a></span>
+        </div>
+        <div class="row">
+          <span class="label">Location</span>
+          <span class="val">Bengaluru, Karnataka, India</span>
+        </div>
+        <div class="row">
+          <span class="label">Status</span>
+          <span class="val" style="display:inline-flex;align-items:center;gap:10px">
+            <span class="pulse" aria-hidden="true"></span> Open to opportunities
+          </span>
+        </div>
+      </div>
+
+      <form class="contact-form" id="contactForm" onsubmit="return submitForm(event)">
+        <div class="field">
+          <label for="cf-name">Name</label>
+          <input id="cf-name" name="name" type="text" required autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="cf-email">Email</label>
+          <input id="cf-email" name="email" type="email" required autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="cf-msg">Message</label>
+          <textarea id="cf-msg" name="message" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Send message <span class="arr">→</span></button>
+        <p class="form-note">Opens your email client addressed to brijeshshetty005@gmail.com.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;width:100%">
+    <span>© 2026 Brijesh Shetty N · Built with care — HTML, CSS, a little JS.</span>
+    <div class="links">
+      <a href="https://github.com/brijesh-shetty" target="_blank" rel="noopener">GitHub ↗</a>
+      <a href="mailto:brijeshshetty005@gmail.com">Email ↗</a>
+      <a href="#top">Back to top ↑</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ---- mobile nav ---- */
+const burger = document.getElementById('burger');
+const navlinks = document.getElementById('navlinks');
+burger.addEventListener('click', () => navlinks.classList.toggle('open'));
+navlinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navlinks.classList.remove('open')));
+
+/* ---- role typewriter ---- */
+const roles = [
+  "Security Intern @ HPE",
+  "Machine Learning Engineer",
+  "Backend Systems Builder",
+  "Applied AI · RAG Engineer",
+  "Full-stack Developer"
+];
+const roleEl = document.getElementById('role');
+let ri = 0, ci = 0, deleting = false;
+function tick(){
+  const cur = roles[ri];
+  if(!deleting){
+    ci++;
+    roleEl.innerHTML = cur.slice(0,ci) + '<span class="caret"></span>';
+    if(ci === cur.length){ deleting = true; setTimeout(tick, 1700); return; }
+  } else {
+    ci--;
+    roleEl.innerHTML = cur.slice(0,ci) + '<span class="caret"></span>';
+    if(ci === 0){ deleting = false; ri = (ri+1) % roles.length; }
+  }
+  setTimeout(tick, deleting ? 32 : 60);
+}
+setTimeout(tick, 1200);
+
+/* ---- project filter ---- */
+const filters = document.querySelectorAll('.filter');
+const cards = document.querySelectorAll('#projgrid .proj');
+filters.forEach(f => f.addEventListener('click', () => {
+  filters.forEach(x => x.classList.remove('active'));
+  f.classList.add('active');
+  const tag = f.dataset.filter;
+  cards.forEach(c => {
+    const tags = (c.dataset.tags || '').split(/\s+/);
+    const show = tag === 'all' || tags.includes(tag);
+    c.style.display = show ? '' : 'none';
+  });
+}));
+
+/* ---- fade-up on scroll ---- */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }});
+}, { threshold: 0.12 });
+document.querySelectorAll('.s-head, .proj, .tl-item, .skill-group, .contact-form, .contact-side, .signal-wrap, .aside-card').forEach(el => {
+  el.classList.add('fadeup');
+  io.observe(el);
+});
+
+/* ---- contact form -> mailto ---- */
+function submitForm(e){
+  e.preventDefault();
+  const n = document.getElementById('cf-name').value.trim();
+  const m = document.getElementById('cf-email').value.trim();
+  const b = document.getElementById('cf-msg').value.trim();
+  const subj = encodeURIComponent(`Portfolio contact from ${n}`);
+  const body = encodeURIComponent(`${b}\n\n— ${n}\n${m}`);
+  window.location.href = `mailto:brijeshshetty005@gmail.com?subject=${subj}&body=${body}`;
+  return false;
+}
+
+/* ---- accent active nav link ---- */
+const sections = ['about','skills','projects','journey','contact'].map(id => document.getElementById(id));
+const navAnchors = Array.from(document.querySelectorAll('.nav-links a[href^="#"]'));
+const ns = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      const id = e.target.id;
+      navAnchors.forEach(a => a.style.color = a.getAttribute('href') === '#' + id ? 'var(--graphite)' : '');
+    }
+  });
+}, { rootMargin: '-40% 0px -55% 0px' });
+sections.forEach(s => s && ns.observe(s));
+</script>
+
+</body>
+</html>
