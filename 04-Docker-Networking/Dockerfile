@@ -8,6 +8,9 @@ WORKDIR /app
 COPY requirements.txt .
 COPY app.py .
 
+# Install ping for networking tests
+RUN apt-get update && apt-get install -y iputils-ping && rm -rf /var/lib/apt/lists/*
+
 # Install Flask (and any other dependencies you might have)
 RUN pip install --no-cache-dir -r requirements.txt
 

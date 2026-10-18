@@ -107,10 +107,7 @@ docker network rm my-bridge-net
 
 ---
 
-## Deployment Evidence
 
-<!-- Add your screenshots here -->
-![Network Create](./screenshot/placeholder.txt)
 
 ---
 
