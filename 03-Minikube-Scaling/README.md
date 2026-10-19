@@ -1,4 +1,4 @@
-# Lab 03 – Scaling Flask App on Single Node using ReplicaSets
+# Lab 03: Scaling Flask App on Single Node using ReplicaSets
 
 ## Real-Life Tech Use Case: E-commerce Flash Sale
 
@@ -12,9 +12,7 @@ During a flash sale on an e-commerce site (like Flipkart's Big Billion Days or A
 
 ## Objective
 
-- Understand ReplicaSets and Pods
-- Scale Flask App deployment
-- Observe pod distribution
+Demonstrated Kubernetes ReplicaSets by deploying a Flash Sale Flask app, scaling it from 3 to 5 replicas, and observing self-healing behavior when a pod is deleted.
 
 ## Key Observations and Learnings
 
@@ -24,6 +22,19 @@ During a flash sale on an e-commerce site (like Flipkart's Big Billion Days or A
 | **Resiliency** | If one Pod fails, the ReplicaSet automatically creates another, so users don't notice downtime |
 | **Efficiency** | Instead of over-provisioning servers, we add Pods when demand spikes and remove them when demand is low |
 | **Real-World Scalability** | Exactly how Netflix, YouTube, or Swiggy scale their microservices to handle peak traffic hours |
+
+---
+
+## Directory Structure
+
+```
+03-Minikube-Scaling/
+├── app.py                      # Flash sale Flask application
+├── Dockerfile                  # Container image build instructions
+├── flashsale-replicaset.yaml   # Kubernetes ReplicaSet + Service manifest
+├── screenshot/                 # Deployment and verification screenshots
+└── README.md
+```
 
 ---
 
@@ -39,58 +50,46 @@ The Flash Sale Flask App (`app.py`) exposes three endpoints:
 
 ---
 
-## Steps
+## Steps Executed
 
-### Step 1: Clean Up Previous Minikube
-
-If you already have a running cluster, stop and delete it:
+### Step 1: Started Minikube with a Single Node
 
 ```bash
 minikube stop
 minikube delete
-```
-
-### Step 2: Start Minikube with a Single Node
-
-```bash
 minikube start --nodes=1
 ```
 
-Verify nodes:
+Verified nodes:
 
 ```bash
 kubectl get nodes
 ```
-
-Expected output:
 
 ```
 NAME       STATUS   ROLES           AGE   VERSION
 minikube   Ready    control-plane   42s   v1.31.0
 ```
 
-### Step 3: Initialize Minikube Docker Environment and Build Image
+### Step 2: Built Docker Image using Minikube's Docker Daemon
 
 ```bash
-minikube docker-env
 eval $(minikube docker-env)
 docker build -t flashsale:1.0 .
 ```
 
-### Step 4: Apply the ReplicaSet Configuration
+### Step 3: Applied the ReplicaSet Configuration
 
 ```bash
 kubectl apply -f flashsale-replicaset.yaml
 ```
-
-Expected output:
 
 ```
 replicaset.apps/flashsale-rs created
 service/flashsale-svc created
 ```
 
-### Step 5: Verify the ReplicaSet and Pods
+### Step 4: Verified the ReplicaSet and Pods (Initial — 3 replicas)
 
 ```bash
 kubectl get rs
@@ -112,7 +111,7 @@ flashsale-rs-f4gsl   1/1     Running   0          3m35s
 flashsale-rs-nb5kl   1/1     Running   0          3m35s
 ```
 
-### Step 6: Scale the ReplicaSet to 5 Replicas
+### Step 5: Scaled the ReplicaSet to 5 Replicas
 
 ```bash
 kubectl scale rs flashsale-rs --replicas=5
@@ -122,7 +121,7 @@ kubectl scale rs flashsale-rs --replicas=5
 replicaset.apps/flashsale-rs scaled
 ```
 
-### Step 7: Verify the Updated ReplicaSet
+Verified:
 
 ```bash
 kubectl get rs
@@ -132,8 +131,6 @@ kubectl get rs
 NAME           DESIRED   CURRENT   READY   AGE
 flashsale-rs   5         5         5       7m38s
 ```
-
-### Step 8: Verify the Updated Pods
 
 ```bash
 kubectl get pods
@@ -148,25 +145,25 @@ flashsale-rs-rbwr4   1/1     Running   0          7m55s
 flashsale-rs-wfbb4   1/1     Running   0          32s
 ```
 
-### Step 9: Delete One Pod and Observe Self-Healing
+### Step 6: Deleted One Pod — Observed Self-Healing
 
 ```bash
-kubectl delete pod <pod-name>
+kubectl delete pod flashsale-rs-4nr6q
 ```
 
 ```
-pod "<pod-name>" deleted
+pod "flashsale-rs-4nr6q" deleted
 ```
 
-Verify that Kubernetes automatically creates a replacement:
+Kubernetes automatically created a replacement pod to maintain 5 replicas:
 
 ```bash
 kubectl get pods
 ```
 
-> **Note:** A new pod appears to maintain the desired count of 5 replicas.
+> **Result:** A new pod was created immediately to restore the desired count of 5 replicas.
 
-### Step 10: View Pod Distribution Across Nodes
+### Step 7: Verified Pod Distribution Across the Node
 
 ```bash
 kubectl get pods -o wide
@@ -181,7 +178,13 @@ flashsale-rs-rbwr4   1/1     Running   0          10m     10.244.0.7    minikube
 flashsale-rs-wfbb4   1/1     Running   0          2m54s   10.244.0.10   minikube   <none>           <none>
 ```
 
-All 5 pods are running on the single `minikube` node.
+All 5 pods ran on the single `minikube` node as expected for a `--nodes=1` cluster.
+
+---
+
+## Deployment Evidence
+
+![ReplicaSet Scaling Screenshot](./screenshot/replicaset-scaling.png)
 
 ---
 
@@ -207,20 +210,6 @@ All 5 pods are running on the single `minikube` node.
 
 **Q7. Where are the pods running with respect to nodes?**
 > All 5 pods are running on the single `minikube` node since we started with `--nodes=1`.
-
----
-
-## Additional Challenges
-
-- Update the `flashsale-replicaset.yaml` file to use a different image
-- Create a **Deployment** instead of a ReplicaSet
-- Use `kubectl describe` to inspect the ReplicaSet and pods
-
-## Tips and Variations
-
-- Use `kubectl get pods -o wide` to see pod distribution across nodes
-- Use `kubectl logs <pod-name>` to view pod logs
-- Use `kubectl exec -it <pod-name> -- /bin/bash` to access a pod's container
 
 ---
 

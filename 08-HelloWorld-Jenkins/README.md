@@ -2,7 +2,7 @@
 
 ## Objective
 
-Learn how to create a simple Jenkins Freestyle project that executes a shell script from a GitHub repository. This is the foundational exercise for understanding Jenkins job configuration, source code management integration, and build execution.
+Created a Jenkins Freestyle project that pulls a shell script from a GitHub repository and executes it. Demonstrated Jenkins job configuration, source code management (SCM) integration, and build execution.
 
 ---
 
@@ -218,12 +218,9 @@ Finished: SUCCESS
 
 ## Deployment Evidence
 
-*Add your verification screenshots below:*
+![Jenkins Job Configuration](./screenshot/jenkins-config.png)
 
-- **Jenkins Job Configuration:**
-  <!-- ![Jenkins Config](screenshot/jenkins-config.png) -->
-- **Jenkins Build Console Output:**
-  <!-- ![Build Output](screenshot/build-output.png) -->
+![Jenkins Build Console Output](./screenshot/build-output.png)
 
 ---
 

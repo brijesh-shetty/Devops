@@ -2,7 +2,7 @@
 
 ## Objective
 
-Create and execute a Jenkins Pipeline that performs multiple stages: **Build**, **Test**, and **Deploy** for a sample Python Flask application. This exercise demonstrates how to implement and manage multi-stage CI/CD pipelines in Jenkins.
+Created and executed a Jenkins declarative pipeline with five stages — **Build**, **Test**, **Deploy**, **Run Application**, and **Test Application** — for a Python Flask application. Demonstrated multi-stage CI/CD pipeline management in Jenkins.
 
 ---
 
@@ -304,12 +304,9 @@ stage('Code Quality') {
 
 ## Deployment Evidence
 
-*Add your verification screenshots below:*
+![Jenkins Pipeline Stages](./screenshot/pipeline-stages.png)
 
-- **Jenkins Pipeline Stages:**
-  <!-- ![Pipeline Stages](screenshot/pipeline-stages.png) -->
-- **Console Output:**
-  <!-- ![Console Output](screenshot/console-output.png) -->
+![Jenkins Console Output](./screenshot/console-output.png)
 
 ---
 

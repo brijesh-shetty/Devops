@@ -2,7 +2,7 @@
 
 ## Objective
 
-Create a real-time monitoring application for a delivery service using Python, Prometheus, and Grafana. Simulate delivery metrics, visualize them on dashboards, and set up automated alerts.
+Built a real-time monitoring application for a ZAPPTTO delivery service using Python, Prometheus, and Grafana. Simulated delivery metrics, visualised them on Grafana dashboards, and configured Prometheus alerting rules that fired when thresholds were exceeded.
 
 ---
 
@@ -158,7 +158,11 @@ A `Jenkinsfile` is provided to automate the entire stack via a Jenkins pipeline:
 
 ## Deployment Evidence
 
-<!-- Add your screenshots here -->
+![Prometheus Targets](./screenshot/prometheus-targets.png)
+
+![Grafana Dashboard](./screenshot/grafana-dashboard.png)
+
+![Prometheus Alerts Firing](./screenshot/prometheus-alerts.png)
 
 ---
 

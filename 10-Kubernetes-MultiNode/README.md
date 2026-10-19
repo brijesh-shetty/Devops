@@ -2,7 +2,7 @@
 
 ## Objective
 
-Deploy two Python Flask microservices (Product Catalog and Shopping Cart) on a multi-node Minikube Kubernetes cluster with ReplicaSets. Ensure pods are distributed across nodes using pod anti-affinity rules for high availability and fault tolerance.
+Deployed two Python Flask microservices (Product Catalog and Shopping Cart) on a 3-node Minikube Kubernetes cluster using Deployments and ReplicaSets. Configured pod anti-affinity rules to distribute pods across nodes, achieving high availability and fault tolerance.
 
 ---
 
@@ -374,16 +374,13 @@ In this exercise, we deployed two Python applications (Product Catalog and Shopp
 
 ## Deployment Evidence
 
-*Add your verification screenshots below:*
+![Minikube Multi-Node Status](./screenshot/minikube-nodes.png)
 
-- **Minikube Multi-Node Status:**
-  <!-- ![Minikube Nodes](screenshot/minikube-nodes.png) -->
-- **Pod Distribution Across Nodes:**
-  <!-- ![Pod Distribution](screenshot/pod-distribution.png) -->
-- **Product Catalog API Response:**
-  <!-- ![Product Catalog](screenshot/product-catalog-api.png) -->
-- **Shopping Cart API Response:**
-  <!-- ![Shopping Cart](screenshot/shopping-cart-api.png) -->
+![Pod Distribution Across Nodes](./screenshot/pod-distribution.png)
+
+![Product Catalog API Response](./screenshot/product-catalog-api.png)
+
+![Shopping Cart API Response](./screenshot/shopping-cart-api.png)
 
 ---
 

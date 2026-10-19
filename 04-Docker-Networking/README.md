@@ -2,7 +2,7 @@
 
 ## Objective
 
-Understand Docker networking concepts and configure a multi-container application with a Python Flask web server, MySQL database, and Redis cache communicating over a custom bridge network.
+Configured Docker networking to connect a Python Flask web server, MySQL database, and Redis cache over a custom bridge network, demonstrating container-to-container communication by DNS name.
 
 ---
 
@@ -14,9 +14,22 @@ Understand Docker networking concepts and configure a multi-container applicatio
 
 ---
 
-## Step-by-Step Execution
+## Directory Structure
 
-### Task 1: Create a Bridge Network
+```
+04-Docker-Networking/
+├── app.py              # Flask REST API application
+├── requirements.txt    # Python dependencies
+├── Dockerfile          # Container image build instructions
+├── screenshot/         # Deployment and verification screenshots
+└── README.md
+```
+
+---
+
+## Steps Executed
+
+### Task 1: Created a Custom Bridge Network
 
 ```bash
 docker network create --driver bridge my-bridge-net
@@ -27,7 +40,7 @@ docker network create --driver bridge my-bridge-net
 87c23b491f5994c74e497f4f4f4f4f4f4f4f4
 ```
 
-### Task 2: Verify the Network
+### Task 2: Verified the Network
 
 ```bash
 docker network ls
@@ -39,7 +52,7 @@ NETWORK ID     NAME            DRIVER    SCOPE
 87c23b491f59   my-bridge-net   bridge    local
 ```
 
-### Task 3: Inspect the Network
+### Task 3: Inspected the Network
 
 ```bash
 docker network inspect my-bridge-net
@@ -64,15 +77,15 @@ docker network inspect my-bridge-net
 ]
 ```
 
-### Task 4: Build the Flask Image & Launch Containers
+### Task 4: Built the Flask Image & Launched All Containers
 
-Build the Flask image:
+Built the Flask image:
 
 ```bash
 docker build -t flask-api .
 ```
 
-Launch the containers on the bridge network:
+Launched all three containers on the same bridge network:
 
 ```bash
 docker run -d --name mysql --net=my-bridge-net mysql:latest
@@ -80,9 +93,9 @@ docker run -d --name redis --net=my-bridge-net redis:latest
 docker run -d --name flask --net=my-bridge-net -p 5001:5001 flask-api
 ```
 
-### Task 5: Test Connectivity
+### Task 5: Tested Container-to-Container Connectivity
 
-Exec into the Flask container and ping other containers by name:
+Exec'd into the Flask container and pinged other containers by DNS name:
 
 ```bash
 docker exec -it flask bash
@@ -98,16 +111,21 @@ ping redis
 # 64 bytes from redis (172.18.0.3): icmp_seq=1 ttl=64 time=0.078 ms
 ```
 
-### Task 6: Clean Up
+✅ Containers communicate using their names as DNS hostnames on the custom bridge network.
+
+### Task 6: Cleaned Up
 
 ```bash
-docker stop mysql redis flask && docker rm mysql redis flask
+docker stop mysql redis flask
+docker rm mysql redis flask
 docker network rm my-bridge-net
 ```
 
 ---
 
+## Deployment Evidence
 
+![Docker Networking Screenshot](./screenshot/docker-networking.png)
 
 ---
 

@@ -2,41 +2,57 @@
 
 ## Objective
 
-Understand how to secure Docker containers using AppArmor profiles with Python for enforcement. Learn to apply AppArmor profiles using the Docker SDK for Python and test restricted actions within the container.
+Secured a Docker container running a Python Flask application using an AppArmor profile. Applied the profile to restrict access to sensitive directories, prevent unauthorized binary execution, and enforce capability restrictions. Verified restrictions using the Docker SDK for Python.
 
 ---
 
 ## Scenario
 
-You are responsible for deploying a Python-based web application using Docker. The application runs inside a Docker container and needs to be secured to:
-- Restrict access to sensitive directories (`/etc/`, `/var/`)
-- Prevent unauthorized execution of binaries (`/bin/`, `/usr/bin/`)
-- Enforce capability restrictions
+Deployed a Python-based web application using Docker with the following security requirements enforced via AppArmor:
+- Restrict read access to `/etc/`
+- Restrict read/write access to `/var/`
+- Prevent execution of binaries in `/bin/` and `/usr/bin/`
+- Restrict `sys_admin` capability
 
 ---
 
-## Prerequisites
+## Environment Setup
 
-Install AppArmor Utilities (Ubuntu/Debian):
+* **OS:** Ubuntu (WSL2)
+* **Container Runtime:** Docker Desktop
+* **AppArmor Utilities:** `apparmor-utils`
+* **Python Docker SDK:** `docker`
+
+---
+
+## Directory Structure
+
+```
+05-Docker-Security/
+├── app.py                      # Flask web application
+├── Dockerfile                  # Container image build instructions
+├── my-apparmor-profile         # AppArmor security profile
+├── apply_apparmor.py           # Script to apply AppArmor via Docker SDK
+├── test_restricted_actions.py  # Script to test restricted actions in container
+├── screenshot/                 # Deployment and verification screenshots
+└── README.md
+```
+
+---
+
+## Prerequisites Installed
 
 ```bash
 sudo apt-get update
 sudo apt-get install apparmor-utils
-```
-
-Install Docker SDK for Python:
-
-```bash
 pip install docker
 ```
 
 ---
 
-## Step-by-Step Execution
+## Steps Executed
 
-### Task 1: Write a Basic Flask Application
-
-File: `app.py` — A simple Flask application that will be containerized.
+### Task 1: Wrote the Flask Application (`app.py`)
 
 ```python
 from flask import Flask
@@ -51,9 +67,9 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
 ```
 
-### Task 2: Containerize the Flask Application
+### Task 2: Containerized the Flask Application
 
-File: `Dockerfile`
+`Dockerfile`:
 
 ```dockerfile
 FROM python:3.8-slim
@@ -64,15 +80,15 @@ EXPOSE 5000
 CMD ["python", "app.py"]
 ```
 
-Build the Docker image:
+Built the Docker image:
 
 ```bash
 docker build -t flask-apparmor .
 ```
 
-### Task 3: Create and Apply AppArmor Profile
+### Task 3: Created and Applied AppArmor Profile
 
-File: `my-apparmor-profile` — Save to `/etc/apparmor.d/my-apparmor-profile`
+`my-apparmor-profile` (saved to `/etc/apparmor.d/my-apparmor-profile`):
 
 ```
 #include <tunables/global>
@@ -89,52 +105,50 @@ File: `my-apparmor-profile` — Save to `/etc/apparmor.d/my-apparmor-profile`
 }
 ```
 
-Load the profile:
+Loaded the profile:
 
 ```bash
 sudo cp my-apparmor-profile /etc/apparmor.d/my-apparmor-profile
 sudo apparmor_parser -r /etc/apparmor.d/my-apparmor-profile
 ```
 
-Run the container with the profile:
+Ran the container with the AppArmor profile applied:
 
 ```bash
 docker run --security-opt="apparmor=my-apparmor-profile" -p 5000:5000 flask-apparmor
 ```
 
-### Task 4: Use Docker SDK to Apply AppArmor Profile
-
-Run `apply_apparmor.py`:
+### Task 4: Applied AppArmor Profile via Docker SDK (`apply_apparmor.py`)
 
 ```bash
 python apply_apparmor.py
 ```
 
-**Expected Output:**
+**Output:**
 ```
 Container started: f8c2a7f9b9b8
 AppArmor profile applied: ['apparmor=my-apparmor-profile']
 ```
 
-### Task 5: Test Restricted Actions
-
-Run `test_restricted_actions.py`:
+### Task 5: Tested Restricted Actions (`test_restricted_actions.py`)
 
 ```bash
 python test_restricted_actions.py
 ```
 
-**Expected Output:**
+**Output:**
 ```
 Attempt to read /etc/passwd: Exit Code 1, Output:
 Attempt to execute /bin/bash: Exit Code 126, Output:
 ```
 
+✅ AppArmor profile successfully blocked access to restricted paths and binaries.
+
 ---
 
 ## Deployment Evidence
 
-<!-- Add your screenshots here -->
+![AppArmor Security Screenshot](./screenshot/apparmor-security.png)
 
 ---
 

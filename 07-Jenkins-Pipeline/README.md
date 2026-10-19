@@ -83,6 +83,8 @@ Jenkins is the industry-standard, open-source automation server for building, te
 
 ## Part 4: Lab — Install and Run Jenkins
 
+Installed and ran Jenkins using Docker, unlocked the dashboard, and verified the Jenkins UI was accessible at `http://localhost:8080`.
+
 ### Step 1: Start Jenkins with Docker
 
 Check for an existing Jenkins container:
@@ -143,6 +145,4 @@ Take a screenshot of the Jenkins dashboard as **deployment evidence**.
 
 ## Deployment Evidence
 
-*Add your Jenkins running screenshot below:*
-
-<!-- ![Jenkins Dashboard](screenshot/jenkins-dashboard.png) -->
+![Jenkins Dashboard Running](./screenshot/jenkins-dashboard.png)

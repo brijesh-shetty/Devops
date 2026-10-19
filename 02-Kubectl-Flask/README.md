@@ -2,16 +2,7 @@
 
 ## Objective
 
-Learn Kubernetes basics using Minikube to set up a single-node cluster and deploy a Python Flask application using `kubectl` and YAML manifests.
-
----
-
-## Prerequisites
-
-- [The Illustrated Children's Guide to Kubernetes](https://www.cncf.io/phippy/the-childrens-illustrated-guide-to-kubernetes/)
-- [Install Minikube](https://minikube.sigs.k8s.io/docs/)
-- Video: [Kubernetes in 5 Minutes](https://www.youtube.com/watch?v=3I9PkvZ80BQ)
-- Video: [Origins of Kubernetes – Tim Hockin](https://www.youtube.com/watch?v=xSztxKexDXM)
+Deployed a Python Flask application on a single-node Minikube Kubernetes cluster using `kubectl` and YAML manifests, demonstrating Kubernetes fundamentals including Deployments, Services, and NodePort access.
 
 ---
 
@@ -22,6 +13,19 @@ Learn Kubernetes basics using Minikube to set up a single-node cluster and deplo
 * **Minikube Version:** `v1.38.1`
 * **Kubernetes Version:** `v1.35.1`
 * **CLI Tools:** `kubectl`, `minikube`
+
+---
+
+## Directory Structure
+
+```
+02-Kubectl-Flask/
+├── app.py             # Flask application serving on port 15000
+├── Dockerfile         # Container image build instructions
+├── flask-app.yaml     # Kubernetes Deployment + NodePort Service manifest
+├── screenshot/        # Deployment and verification screenshots
+└── README.md
+```
 
 ---
 
@@ -58,15 +62,13 @@ minikube ssh                                      # SSH into the Minikube VM
 
 ## Step-by-Step Execution
 
-### Step 1: Start Minikube
+### Step 1: Started Minikube
 
 ```bash
 minikube start
 ```
 
-### Step 2: Create the Flask Application
-
-File: `app.py`
+### Step 2: Flask Application (`app.py`)
 
 ```python
 from flask import Flask
@@ -81,9 +83,7 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=15000)
 ```
 
-### Step 3: Create the Dockerfile
-
-File: `Dockerfile`
+### Step 3: Dockerfile
 
 ```dockerfile
 FROM python:3.8-slim
@@ -93,19 +93,18 @@ RUN pip install flask
 CMD ["python", "app.py"]
 ```
 
-### Step 4: Build the Docker Image with Minikube's Docker Daemon
+### Step 4: Built the Docker Image with Minikube's Docker Daemon
 
 ```bash
-minikube docker-env
 eval $(minikube docker-env)
 docker build -t flask-app .
 ```
 
-> **Note:** `eval $(minikube docker-env)` configures your Docker CLI to use Minikube's Docker daemon, so the built image is available inside the cluster.
+> **Note:** `eval $(minikube docker-env)` configures the Docker CLI to use Minikube's Docker daemon so the image is available inside the cluster without a registry.
 
-### Step 5: Create the Kubernetes Deployment YAML
+### Step 5: Kubernetes Deployment YAML (`flask-app.yaml`)
 
-File: `flask-app.yaml` (initial version — Deployment only)
+Initial version (Deployment only):
 
 ```yaml
 apiVersion: apps/v1
@@ -130,15 +129,15 @@ spec:
             - containerPort: 15000
 ```
 
-> **About `imagePullPolicy: Never`:** Tells Kubernetes to only use the local image and never pull from a remote registry like Docker Hub.
+> **About `imagePullPolicy: Never`:** Tells Kubernetes to only use the local image and never pull from Docker Hub.
 
-### Step 6: Deploy the Application
+### Step 6: Deployed the Application
 
 ```bash
 kubectl apply -f flask-app.yaml
 ```
 
-### Step 7: Check Deployment Status
+### Step 7: Verified Deployment Status
 
 ```bash
 kubectl get deployments
@@ -149,7 +148,7 @@ NAME        READY   UP-TO-DATE   AVAILABLE   AGE
 flask-app   1/1     1            1           5s
 ```
 
-### Step 8: Verify Pods
+### Step 8: Verified Pods
 
 ```bash
 kubectl get pods -l app=flask-app
@@ -160,71 +159,20 @@ NAME                        READY   STATUS    RESTARTS   AGE
 flask-app-3443a-213a        1/1     Running   0          5s
 ```
 
-### Step 9: Describe the Deployment
+### Step 9: Discovered Port Access Issue
 
-```bash
-kubectl describe deployment flask-app
-```
-
-This shows detailed info: replicas, strategy, pod template, events, etc.
-
-### Step 10: View Application Logs
-
-```bash
-kubectl logs <pod-name>
-```
-
-```
- * Serving Flask app 'app'
- * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:15000
-```
-
-### Step 11: Check Services
-
-```bash
-kubectl get services
-```
-
-```
-NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
-kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   7d11h
-```
-
-### Step 12: Try Accessing the App (Will Fail)
+Without a Service, the app is not reachable externally:
 
 ```bash
 curl http://127.0.0.1:15000
 # curl: (7) Failed to connect to 127.0.0.1 port 15000
 ```
 
-> **Why it fails:** Minikube runs in a virtual environment. The app exposes port 15000 internally but not externally. A **Service** is needed.
+> **Why it fails:** Minikube runs in a VM. A **Service** of type `NodePort` is required to expose the port externally.
 
-### Step 13: Add a Service to the Deployment YAML
-
-Update `flask-app.yaml` to include a `NodePort` Service:
+### Step 10: Added NodePort Service to `flask-app.yaml`
 
 ```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: flask-app
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: flask-app
-  template:
-    metadata:
-      labels:
-        app: flask-app
-    spec:
-      containers:
-        - name: flask-app
-          image: flask-app:latest
-          imagePullPolicy: Never
-          ports:
-            - containerPort: 15000
 ---
 apiVersion: v1
 kind: Service
@@ -239,7 +187,7 @@ spec:
   type: NodePort
 ```
 
-Apply the updated manifest:
+Applied the updated manifest:
 
 ```bash
 kubectl apply -f flask-app.yaml
@@ -250,7 +198,7 @@ deployment.apps/flask-app unchanged
 service/flask-app-service created
 ```
 
-### Step 14: Access the Flask App via Minikube
+### Step 11: Accessed Flask App via Minikube
 
 ```bash
 minikube service flask-app-service --url
@@ -260,9 +208,7 @@ minikube service flask-app-service --url
 http://127.0.0.1:36157
 ```
 
-> ⚠️ **Keep this terminal open** (Docker driver requires it).
-
-In a **new terminal**, test with curl:
+Tested with curl:
 
 ```bash
 curl http://127.0.0.1:36157
@@ -272,7 +218,7 @@ curl http://127.0.0.1:36157
 Hello from Flask on Kubernetes!
 ```
 
-✅ The Flask application is now accessible!
+✅ Flask application successfully accessible via Kubernetes NodePort Service.
 
 ---
 
@@ -292,7 +238,7 @@ External Request (port 15000) → Service (port 15000) → Container (targetPort
 
 ## Deployment Evidence
 
-<!-- Add your screenshots here -->
+![Flask App on Minikube](./screenshot/flask-minikube.png)
 
 ---
 
