@@ -28,8 +28,11 @@ pip3 install prometheus-client
 ```
 06-Grafana-Monitoring/
 ├── delivery_metrics.py    # Python script to simulate metrics
-├── prometheus.yml         # Prometheus configuration
-├── alert_rules.yml        # Alert rules configuration
+├── prometheus.yml         # Prometheus scrape configuration
+├── alert_rules.yml        # Prometheus alerting rules
+├── Dockerfile             # Container image for metrics app
+├── Jenkinsfile            # Jenkins pipeline to run the full stack
+├── screenshot/            # Verification screenshots
 └── README.md
 ```
 
@@ -65,7 +68,9 @@ curl http://localhost:8000/metrics
 
 `prometheus.yml` defines scrape jobs:
 - `prometheus` → scrapes itself at `localhost:9090`
-- `delivery_service` → scrapes Python app at `172.17.0.1:8000`
+- `delivery_service` → scrapes Python app at `host.docker.internal:8000`
+
+> **Note:** `host.docker.internal` resolves to the host machine from inside a Docker container on Windows/macOS Docker Desktop. On native Linux, use `172.17.0.1:8000` instead.
 
 Run Prometheus:
 
@@ -107,7 +112,7 @@ Open [http://localhost:3000](http://localhost:3000)
 
 Navigate: **Home → Connections → Data Sources → Prometheus**
 
-- **URL:** `http://172.17.0.1:9090`
+- **URL:** `http://host.docker.internal:9090`
 - Click **Save & Test**
 
 #### 3d. Create Dashboard
@@ -130,6 +135,15 @@ pending = random.randint(50, 100)  # Increase range to exceed alert threshold
 ```
 
 Restart the Python script and verify alerts in Prometheus UI and Grafana.
+
+### Step 5: Automate with Jenkins (Optional)
+
+A `Jenkinsfile` is provided to automate the entire stack via a Jenkins pipeline:
+
+1. Start Jenkins: `docker run -d -p 8080:8080 --name jenkins -v jenkins_home:/var/jenkins_home -v //var/run/docker.sock:/var/run/docker.sock -u root jenkins/jenkins:lts`
+2. Open [http://localhost:8080](http://localhost:8080) and unlock Jenkins.
+3. Create a new **Pipeline** job, paste the contents of `Jenkinsfile`, and click **Build Now**.
+4. All 5 stages (`Pre-check Docker`, `Setup Workspace`, `Build Docker Image`, `Run Application`, `Run Prometheus & Grafana`) should turn green.
 
 ---
 
@@ -155,3 +169,5 @@ Restart the Python script and verify alerts in Prometheus UI and Grafana.
 | `delivery_metrics.py` | Python script simulating delivery metrics |
 | `prometheus.yml` | Prometheus scrape configuration |
 | `alert_rules.yml` | Prometheus alerting rules |
+| `Dockerfile` | Containerises the Python metrics app |
+| `Jenkinsfile` | Jenkins pipeline for full stack automation |
